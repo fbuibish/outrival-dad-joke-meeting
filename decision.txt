@@ -1,0 +1,6 @@
+Primary Route: Customer Support - Speak to an Agent - General Inquiries
+Reason: The customer seems to be looking for general assistance or information, as they are not providing specific details or questions in the conversation.
+Secondary Routes: 
+- Technical Support - Mobile App Assistance - App Installation Issues (if the customer mentions having trouble with an app)
+- Lost or Stolen Card - Report Lost Card - Block Current Card (if the customer reports an issue with their card)
+- Rewards - Rewards Balance - Points Balance (if the customer asks about rewards or points)

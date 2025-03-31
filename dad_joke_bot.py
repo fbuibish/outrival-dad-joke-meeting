@@ -8,13 +8,14 @@ import aiohttp
 import uuid
 from typing import Dict, Any
 from runner import configure
+import random
 
 from pipecat.frames.frames import TextFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineTask
 from pipecat.services.openai import OpenAILLMService
-from pipecat.services.cartesia import CartesiaTTSService
+from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
 load_dotenv(override=True)
@@ -44,9 +45,20 @@ async def main():
     task = None
     
     try:
-        # Generate unique ID and name for this bot instance
-        bot_id = str(uuid.uuid4())
-        bot_name = f"Dad Joke Bot {bot_id[:6]}"
+        # List of dad-themed names
+        dad_first_names = [
+            "Grillmaster", "Lawnmower", "Thermostat", "Remote", "Toolbelt",
+            "Slipper", "Newspaper", "BBQ", "Garage", "Handyman",
+            "Snoozer", "Workshop", "Cardigan", "Cargo", "Sneaker"
+        ]
+        
+        dad_last_names = [
+            "McJokes", "Punderson", "Dadsworth", "Groanington", "Chuckleston",
+            "Quipster", "Wisecraft", "Jesterly", "Dadjean", "Comedyfather",
+            "Punmaster", "Jokesmith", "Dadlington", "Funnydad", "Punderful"
+        ]
+        
+        bot_name = f"{random.choice(dad_first_names)} {random.choice(dad_last_names)}"
 
         async with aiohttp.ClientSession() as session:
             # Configure room and get URL + token
@@ -62,9 +74,10 @@ async def main():
                 ),
             )
 
-            tts = CartesiaTTSService(
-                api_key=os.getenv("CARTESIA_API_KEY"),
-                voice_id=os.getenv("CARTESIA_VOICE_ID", "71a7ad14-091c-4e8e-a314-022ece01c121"),
+            tts = ElevenLabsTTSService(
+                api_key=os.getenv("ELEVENLABS_API_KEY"),
+                voice_id=os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM"),
+                model_id="eleven_monolingual_v1"
             )
 
             llm = OpenAILLMService(
@@ -85,7 +98,12 @@ async def main():
                 }
             ]
 
-            pipeline = Pipeline([llm, tts, transport.output()])
+            pipeline = Pipeline([
+                transport.input(),
+                llm,
+                tts,
+                transport.output()
+            ])
             task = PipelineTask(pipeline)
             runner = PipelineRunner()
 
@@ -107,7 +125,8 @@ async def main():
                     return
                 
                 # Only process other Dad Joke Bots
-                if participant_name.startswith("Dad Joke Bot"):
+                participant_first_name = participant_name.split()[0] if participant_name else ""
+                if participant_first_name in dad_first_names:
                     participant_count += 1
                     other_participants[participant_id] = participant
                     

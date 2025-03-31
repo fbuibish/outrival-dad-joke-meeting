@@ -1,0 +1,14 @@
+user: Hello?
+assistant: Hello! Thank you for contacting us. How
+user: Thank you for contacting us.
+user: Hello.
+assistant: Hello! Thank you for reaching out. How can I
+user: Thank you for reaching out.
+user: Hello. I'm here to assist you.
+assistant: you Hello! I'm here to assist you. How can I help you today?
+user: How can I help you today?
+user: Oh, I apologize for the confusion.
+assistant: Oh, I apologiz e for the confusion. As a customer servi ce
+user: As a customer service rep,
+assistant: No problem at all! How
+user: No problem at all.
