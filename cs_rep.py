@@ -63,9 +63,9 @@ async def main():
                 token,
                 bot_name,
                 DailyParams(
-                    audio_in_enabled=True,
+                    # audio_in_enabled=True,
                     audio_out_enabled=True,
-                    camera_out_enabled=False,
+                    # camera_out_enabled=False,
                     vad_enabled=True,
                     vad_analyzer=SileroVADAnalyzer(),
                     transcription_enabled=True,
@@ -85,19 +85,22 @@ async def main():
             messages = [
                 {
                     "role": "system",
-                    "content": """You are a friendly and professional customer service representative 
-whose primary role is to assist customers and route them to the correct department. 
-First warmly greet the customer, then carefully listen to their inquiry. 
-Based on their needs, determine the most appropriate department from:
-- Technical Support (for technical issues and troubleshooting)
-- Billing Department (for payment, subscription, and invoice matters)
-- Sales Team (for new purchases, upgrades, and product information)
-- Account Management (for account-related issues and changes)
-- General Customer Service (for other inquiries)
+                    "content": """You are a professional customer service representative focused on efficiently routing customers to the right department.
 
-After identifying the appropriate department, inform the customer which 
-department would be best suited to help them and why. Keep responses professional 
-but warm, and solution-focused"""
+Your approach should be:
+1. Start with a brief, warm greeting
+2. PRIMARILY LISTEN to fully understand the customer's issue before responding at length
+3. Ask clarifying questions if needed to properly categorize their inquiry
+4. Only after understanding their needs, direct them to the appropriate department:
+   - Technical Support (device issues, software problems, troubleshooting)
+   - Billing Department (payments, invoices, subscription changes)
+   - Sales Team (new purchases, product information, upgrades)
+   - Account Management (account changes, access issues, profile updates)
+   - General Customer Service (all other inquiries)
+
+Important: Do not provide detailed responses or attempt to solve problems yourself. Your main job is accurate routing.
+
+Keep your responses concise, professional, and focused on understanding the customer's issue before directing them to the right department."""
                 }
             ]
 
@@ -120,16 +123,26 @@ but warm, and solution-focused"""
             
             task = PipelineTask(pipeline, params=PipelineParams(allow_interruptions=True))
 
-            @transport.event_handler("on_participant_joined")
-            async def on_participant_joined(transport, participant):
+            @transport.event_handler("on_first_participant_joined")
+            async def on_first_participant_joined(transport, participant):
                 participant_id = participant["id"]
                 participant_name = participant.get("info", {}).get("userName", "")
                 
                 # log starting call
                 logger.info(f"Starting call with {participant_name}")
+                await transport.capture_participant_transcription(participant_id)
+
+                #sleep for 1 second
+                await asyncio.sleep(15)
+                await task.queue_frames([context_aggregator.user().get_context_frame()])
+            
+            @transport.event_handler("on_participant_joined")
+            async def on_participant_joined(transport, participant):
+                participant_id = participant["id"]
+                participant_name = participant.get("info", {}).get("userName", "")
+                logger.info(f"Participant {participant_name} joined the call")
 
                 await transport.capture_participant_transcription(participant_id)
-                await task.queue_frames([context_aggregator.user().get_context_frame()])
 
             # @transport.event_handler("on_transcription_message")
             # async def on_transcription_message(transport, message: Dict[str, Any]):

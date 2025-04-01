@@ -10,9 +10,9 @@ DAILY_API_KEY=your_daily_api_key
 # OpenAI API Configuration
 OPENAI_API_KEY=your_openai_api_key
 
-# Cartesia TTS Configuration
-CARTESIA_API_KEY=your_cartesia_api_key
-CARTESIA_VOICE_ID=your_cartesia_voice_id
+# ElevenLabs TTS Configuration
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
+ELEVENLABS_VOICE_ID=your_elevenlabs_voice_id
 ```
 
 Note: Never commit your actual API keys to version control. The values shown above are just examples.
@@ -45,20 +45,18 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Running the Dad Joke Bot
+## Running the Application
 
 1. Make sure you've set up your environment variables in the `.env` file as shown above.
 
-2. Run the bot:
+2. Start the customer service representative script:
 ```bash
-python dad_joke_bot.py
+python cs_rep.py
 ```
 
-The bot will:
-- Connect to the Daily.co room specified in your environment variables
-- Generate a unique name for itself (e.g., "Dad Joke Bot abc123")
-- Tell dad jokes and respond to other Dad Joke Bots in the room
-- Use text-to-speech to speak the jokes out loud
-- Automatically clean up and exit when you press Ctrl+C
+3. Quickly start the customer script (within 15 seconds):
+```bash
+python customer.py
+```
 
-To stop the bot, press Ctrl+C in your terminal. 
+To stop the application, press Ctrl+C in your terminal. 

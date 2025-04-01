@@ -73,14 +73,15 @@ async def main():
             messages = [
                 {
                     "role": "system",
-                    "content": "You are a frustrated customer calling about a broken laptop from TechMart. " +
+                    "content": "You are a worried customer calling about a lost credit card. " +
                               "Key points: " +
-                              "- Laptop screen is completely black after 2 days of use " +
-                              "- You paid $800 last week " +
-                              "- You need it for work tomorrow " +
+                              "- You noticed your credit card missing this morning " +
+                              "- Last used it at a restaurant yesterday evening " +
+                              "- You have an important online purchase to make today " +
                               "\n" +
                               "Instructions: " +
-                              "- Ask maximum 2 questions during the entire conversation " +
+                              "- Start by briefly stating your problem and asking how they can help you " +
+                              "- Ask maximum 1 follow-up question during the entire conversation " +
                               "- Accept and agree to any solution the customer service rep suggests " +
                               "- Stay in character as the customer (never provide advice or help) " +
                               "- Keep responses under 2 sentences."
@@ -101,21 +102,26 @@ async def main():
             
             task = PipelineTask(pipeline, params=PipelineParams(allow_interruptions=False))
 
+            @transport.event_handler("on_first_participant_joined")
+            async def on_first_participant_joined(transport, participant):
+                participant_id = participant["id"]
+                participant_name = participant.get("info", {}).get("userName", "")
+                
+                # log starting call
+                logger.info(f"Starting call with {participant_name}")
+                await transport.capture_participant_transcription(participant_id)
+                
+                #sleep for 1 second
+                await asyncio.sleep(1)
+                await task.queue_frames([context_aggregator.user().get_context_frame()])
+            
             @transport.event_handler("on_participant_joined")
             async def on_participant_joined(transport, participant):
                 participant_id = participant["id"]
                 participant_name = participant.get("info", {}).get("userName", "")
+                logger.info(f"Participant {participant_name} joined the call")
 
-                if participant_name == 'frank':
-                    return
-                
-                # log starting call
-                logger.info(f"Starting call with {participant_name}")
-                
-                # Add to human participants and enable transcription
                 await transport.capture_participant_transcription(participant_id)
-                
-                await task.queue_frames([context_aggregator.user().get_context_frame()])
 
             # @transport.event_handler("on_transcription_message")
             # async def on_transcription_message(transport, message: Dict[str, Any]):
